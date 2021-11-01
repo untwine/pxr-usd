@@ -21,13 +21,12 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
-#include "pxr/usd/usdContrived/derivedMultipleApplyAPI.h"
+#include "pxr/usd/usdContrived/derivedNonAppliedAPI.h"
 #include "pxr/usd/usd/schemaBase.h"
 
 #include "pxr/usd/sdf/primSpec.h"
 
 #include "pxr/usd/usd/pyConversions.h"
-#include "pxr/base/tf/pyAnnotatedBoolResult.h"
 #include "pxr/base/tf/pyContainerConversions.h"
 #include "pxr/base/tf/pyResultConversions.h"
 #include "pxr/base/tf/pyUtils.h"
@@ -49,84 +48,36 @@ namespace {
 // fwd decl.
 WRAP_CUSTOM;
 
-        
-static UsdAttribute
-_CreateTestAttrThreeAttr(UsdContrivedDerivedMultipleApplyAPI &self,
-                                      object defaultVal, bool writeSparsely) {
-    return self.CreateTestAttrThreeAttr(
-        UsdPythonToSdfType(defaultVal, SdfValueTypeNames->Int), writeSparsely);
-}
-
-static bool _WrapIsDerivedMultipleApplyAPIPath(const SdfPath &path) {
-    TfToken collectionName;
-    return UsdContrivedDerivedMultipleApplyAPI::IsDerivedMultipleApplyAPIPath(
-        path, &collectionName);
-}
 
 static std::string
-_Repr(const UsdContrivedDerivedMultipleApplyAPI &self)
+_Repr(const UsdContrivedDerivedNonAppliedAPI &self)
 {
     std::string primRepr = TfPyRepr(self.GetPrim());
-    std::string instanceName = self.GetName();
     return TfStringPrintf(
-        "UsdContrived.DerivedMultipleApplyAPI(%s, '%s')",
-        primRepr.c_str(), instanceName.c_str());
-}
-
-struct UsdContrivedDerivedMultipleApplyAPI_CanApplyResult : 
-    public TfPyAnnotatedBoolResult<std::string>
-{
-    UsdContrivedDerivedMultipleApplyAPI_CanApplyResult(bool val, std::string const &msg) :
-        TfPyAnnotatedBoolResult<std::string>(val, msg) {}
-};
-
-static UsdContrivedDerivedMultipleApplyAPI_CanApplyResult
-_WrapCanApply(const UsdPrim& prim, const TfToken& name)
-{
-    std::string whyNot;
-    bool result = UsdContrivedDerivedMultipleApplyAPI::CanApply(prim, name, &whyNot);
-    return UsdContrivedDerivedMultipleApplyAPI_CanApplyResult(result, whyNot);
+        "UsdContrived.DerivedNonAppliedAPI(%s)",
+        primRepr.c_str());
 }
 
 } // anonymous namespace
 
-void wrapUsdContrivedDerivedMultipleApplyAPI()
+void wrapUsdContrivedDerivedNonAppliedAPI()
 {
-    typedef UsdContrivedDerivedMultipleApplyAPI This;
+    typedef UsdContrivedDerivedNonAppliedAPI This;
 
-    UsdContrivedDerivedMultipleApplyAPI_CanApplyResult::Wrap<UsdContrivedDerivedMultipleApplyAPI_CanApplyResult>(
-        "_CanApplyResult", "whyNot");
-
-    class_<This, bases<UsdContrivedMultipleApplyAPI> >
-        cls("DerivedMultipleApplyAPI");
+    class_<This, bases<UsdContrivedNonAppliedAPI> >
+        cls("DerivedNonAppliedAPI");
 
     cls
-        .def(init<UsdPrim, TfToken>())
-        .def(init<UsdSchemaBase const&, TfToken>())
+        .def(init<UsdPrim>(arg("prim")))
+        .def(init<UsdSchemaBase const&>(arg("schemaObj")))
         .def(TfTypePythonClass())
 
-        .def("Get",
-            (UsdContrivedDerivedMultipleApplyAPI(*)(const UsdStagePtr &stage, 
-                                       const SdfPath &path))
-               &This::Get,
-            (arg("stage"), arg("path")))
-        .def("Get",
-            (UsdContrivedDerivedMultipleApplyAPI(*)(const UsdPrim &prim,
-                                       const TfToken &name))
-               &This::Get,
-            (arg("prim"), arg("name")))
+        .def("Get", &This::Get, (arg("stage"), arg("path")))
         .staticmethod("Get")
-
-        .def("CanApply", &_WrapCanApply, (arg("prim"), arg("name")))
-        .staticmethod("CanApply")
-
-        .def("Apply", &This::Apply, (arg("prim"), arg("name")))
-        .staticmethod("Apply")
 
         .def("GetSchemaAttributeNames",
              &This::GetSchemaAttributeNames,
              arg("includeInherited")=true,
-             arg("instanceName")=TfToken(),
              return_value_policy<TfPySequenceToList>())
         .staticmethod("GetSchemaAttributeNames")
 
@@ -136,16 +87,7 @@ void wrapUsdContrivedDerivedMultipleApplyAPI()
 
         .def(!self)
 
-        
-        .def("GetTestAttrThreeAttr",
-             &This::GetTestAttrThreeAttr)
-        .def("CreateTestAttrThreeAttr",
-             &_CreateTestAttrThreeAttr,
-             (arg("defaultValue")=object(),
-              arg("writeSparsely")=false))
 
-        .def("IsDerivedMultipleApplyAPIPath", _WrapIsDerivedMultipleApplyAPIPath)
-            .staticmethod("IsDerivedMultipleApplyAPIPath")
         .def("__repr__", ::_Repr)
     ;
 
