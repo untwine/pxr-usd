@@ -1,6 +1,4 @@
-/*!
-
-\page Usd_Page_GeneratingSchemas Creating New Schema Classes with usdGenSchema
+# Creating New Schema Classes with usdGenSchema {#Usd_Page_GeneratingSchemas}
 
 USD provides a code generator script 'usdGenSchema' for creating new schema 
 classes. The script is driven by a USD layer (typically named schema.usda) and 
@@ -38,7 +36,7 @@ to compile and work with USD Core successfully.
 
 See pxr/usd/lib/usdGeom/schema.usda for an example.
 
-\section Usd_IsAVsAPISchemas IsA Vs. API Schemas
+## IsA Vs. API Schemas {#Usd_IsAVsAPISchemas}
 
 Schema classes can be classified into the following two types:
 
@@ -141,7 +139,7 @@ class declaration in a schema.usda file.
 
 See \ref Usd_ExampleSchema for examples of each type of schema class.
 
-\section Usd_BuiltinAPISchemas Built-in applied API schemas
+## Built-in applied API schemas {#Usd_BuiltinAPISchemas}
 
 In some cases an IsA schema may want to have certain API schemas always applied 
 to prims of its schema type. To avoid having to manually apply these API schemas
@@ -188,7 +186,7 @@ and can be specified in two ways:
    apply it using the instance name "foo", then, OtherMultiApplyAPI would also 
    be applied using the suffixed instance name "foo:someName"
 
-\subsection Usd_SchemaDefinedBuiltinAPIs Schema defined built-in APIs
+### Schema defined built-in APIs {#Usd_SchemaDefinedBuiltinAPIs}
 
 The first and most straightforward way an IsA or applied API schema author
 can specify which applied API schemas it wants built-in is by prepending them 
@@ -268,7 +266,7 @@ itself (like changing the property's type) and is typically used for changing
 the default value for the property.
 \sa \ref Usd_APISchemaStrengthOrdering
 
-\subsection Usd_AutoAppliedAPISchemas Auto applied API schemas
+### Auto applied API schemas {#Usd_AutoAppliedAPISchemas}
 
 In addition to schemas being able to declare built-in applied API schemas,
 an applied API schema can specify that it should be automatically applied to 
@@ -311,7 +309,7 @@ listed types. Note that this customData field is only supported for single apply
 API schemas as multiple apply API schemas cannot be applied without an instance 
 name.
 
-\subsection Usd_PluginAutoAppliedAPISchemas Plugin defined auto applied API schemas
+### Plugin defined auto applied API schemas {#Usd_PluginAutoAppliedAPISchemas}
 
 Lastly, it is also possible for plugins to specify additional built-in API 
 schemas for other schema types outside of schema generation. This is useful if a
@@ -355,58 +353,67 @@ Multiple apply schemas (in addition to single apply) can also be auto applied
 using this plugin metadata as long as the fully qualified instance name for the 
 mulitple apply schema is provided.
 
-\subsection Usd_APISchemaStrengthOrdering Property conflicts, composition, and API schema strength ordering
+### Property conflicts, composition, and API schema strength ordering {#Usd_APISchemaStrengthOrdering}
 
-Given that we encourage (or even require in the case of multi apply schemas) the
-use of namespace prefixes for API schema property names, we expect most 
-properties defined in API schemas will be unique to the schema. However, there 
-will always be the possibility that properties with the same name may be defined 
-in multiple API schemas applied to the same prim. To account for this, there is 
-a strength ordering for applied API schemas that we use to determine which 
-property definition "wins" when more than one API schema can define it. 
+Given that we encourage (or even require in the case of multiple-apply schemas)
+the use of namespace prefixes for API schema property names, we expect most
+properties defined in API schemas will be unique to the schema. However, there
+will always be the possibility that properties with the same name may be defined
+in multiple API schemas applied to the same prim. To account for this, there is
+a strength ordering for applied API schemas that determines which property
+definition "wins" when more than one API schema defines a property of the same
+name.
 
-Firstly, the strongest opinion for all aspects of a built-in property in an IsA 
-schema's \ref UsdPrimDefinition "prim definition" will always come from the IsA
-schema itself. 
+In defining schema strength ordering, it is helpful to talk about a schema order
+where **the first schema is the strongest and the last schema is the
+weakest**. The strength order of schemas is as follows:
 
-Next, any auto applied API schemas, whether defined in the 
-\ref Usd_AutoAppliedAPISchemas "API schema's definition" or in a 
-\ref Usd_PluginAutoAppliedAPISchemas "plugin's metadata", will be appended to 
-the end of the list of built-in applied API schemas for the IsA or single-apply 
-API they apply to. Since the built-in schema list is ordered strongest to 
-weakest for application, this also means that <b> auto applied schemas will 
-always be weaker relative to the built-in API schemas defined in the schema they
-are auto applied to</b>. When more than one API schema is auto applied to the 
-same schema type, they are always sorted into reverse dictionary order by schema name 
-before they are appended to the built-in schemas. The dictionary ordering is 
-arbitrary but deterministic as there is no provided way to indicate strength 
-ordering between auto applied API schemas.
- 
-Lastly, the \ref Usd_SchemaDefinedBuiltinAPIs "built-in schemas" that are 
-defined in the apiSchemas metadata of the IsA schema are applied in the order 
-they appear in the composed list operation of the apiSchemas field, using a 
-depth first expansion of any API schema that itself has included built-in API
-schemas. This list order is strongest to weakest, so property name conflicts 
-will prefer a property definition from an API schema earlier in the list.
+The strongest opinion for all aspects of a built-in property in the IsA schema's
+\ref UsdPrimDefinition "prim definition". I.e., the IsA schema comes first in
+the schema order.
 
-Any API schemas that are applied to a prim instance in scene description (which
-we'll refer to as "authored API schemas") are appended to the prim type's API 
-schemas and will therefore have a weaker opinion on any properties they define 
-that are also present in the prim type's schema definition, including all of its built-in
-and auto-applied API schemas. In other words, authored API schemas cannnot override any
-properties in the prim type's definition.
+The strength order of applied API schemas is determined by adding them to the
+schema order, after the IsA schema, as follows:
 
-For properties that are defined by more than one of the included schema,
-fields for which the strongest property definition does *not* express an opinion, 
-**may** be composed from weaker API schema definitions if the following 
-conditions are met:
-- The property type of the stronger and weaker property definitions match. Specifically,
-  the property definitions must both be attributes or both be relationships, and if they
-  are attributes, their type names must be exactly the same.
-- The field is in the set of _allowed composable fields_ which currently includes only
-  _default_ and _hidden_. We may expand the set of allowed composable fields in the future.
+1. Any \ref Usd_SchemaDefinedBuiltinAPIs "built-in schemas" that are defined in
+   `apiSchemas` metadata are added to the schema order, immediately after the
+   schema that introduces them, in the order they appear in the composed
+   `apiSchemas` field.
 
-\subsection Usd_APISchemaPropertyOverride API schema property overrides
+2. Any auto applied API schemas (whether defined in the \ref
+   Usd_AutoAppliedAPISchemas "API schema's definition" or in a \ref
+   Usd_PluginAutoAppliedAPISchemas "plugin's metadata") come immediately after
+   the schema to which they apply. When more than one API schema is auto applied
+   to the same schema type, they are sorted in reverse dictionary order by
+   schema name before they are appended to the schema order.  Reverse dictionary
+   ordering ensures that the newest version of a versioned schema is the
+   strongest if multiple versions are applied. Otherwise, this ordering is
+   arbitrary but deterministic as there is no provided way to indicate strength
+   ordering between auto applied API schemas.
+
+3. Authored API schemas, API schemas that are applied to a prim instance in
+   scene description, are added last.
+
+This applied API strength order is invoked recursively, in a depth first
+expansion, because **all schema types can introduce built-in schemas and can
+cause additional auto applied schemas to be applied**.
+
+### API schema property underrides {#Usd_APISchemaPropertyUnderride}
+
+For properties that are defined by more than one of the included schemas, fields
+for which the strongest property definition does *not* express an opinion,
+**may** be composed from weaker API schema definitions (i.e., the weaker
+definition may act as an _API schema underride_) if the following conditions are
+met:
+- The property types of the stronger and weaker property definitions
+  match. Specifically, the property definitions must both be attributes or both
+  be relationships, and if they are attributes, their type names must be exactly
+  the same.
+- The field is in the set of _allowed composable fields_, which currently
+  includes only _default_ and _hidden_. We may expand the set of allowed
+  composable fields in the future.
+
+### API schema property overrides {#Usd_APISchemaPropertyOverride}
 
 Sometimes when an IsA or an API schema includes another API schema as a
 built-in, it may also want to alter one or more of the built-in schema's
@@ -469,13 +476,14 @@ There are some limitations to how API schema override properties can be used:
    is an attribute, the type name (int, float, color3f, etc.) of the attribute. 
    Any API schema property overrides that do not conform to the underlying 
    property type are ignored. Note that the variability of an API schema override
-   property is allowed to be different than the defined property but the override's
-   variability will be ignored.
+   property is allowed to be different than the defined property but the
+   override's variability will be ignored.
 
-2. API schema override properties are currently only resolved when generating the
-   static \ref UsdPrimDefinition "prim definitions" for registered IsA and applied
-   API schema types in the schema registry. "Dangling overrides" are not retained
-   which means they cannot be used by an IsA schema to provide overrides to 
+2. API schema property overrides are currently only resolved when generating the
+   static \ref UsdPrimDefinition "prim definitions" for registered IsA and
+   applied API schema types in the schema registry. "Dangling overrides" are not
+   retained which means they cannot be used by an IsA schema (or by builtin or
+   auto-apply schemas included by an IsA schema) to provide overrides to
    properties from authored API schemas applied in scene description.
 
 3. API schema property overrides only apply to the properties defined by API 
@@ -488,11 +496,12 @@ There are some limitations to how API schema override properties can be used:
    included by "C") and vice versa.
 
 Note that API schema property overrides are specific to overriding properties
-from built-in API schemas and do not apply to overriding properties via schema
-inheritance. This is because schema properties always sparsely compose via 
-class inheritance during schema generation so no specification is necessary.
+from built-in API schemas and do not apply to overriding properties via typed
+schema inheritance. This is because schema properties always sparsely compose
+via class inheritance during schema generation so no override specification is
+necessary.
 
-\section Usd_SchemaCodeGeneration Schema Code Generation
+## Schema Code Generation {#Usd_SchemaCodeGeneration}
 
 Simply run the ```usdGenSchema``` command to generate code in the current 
 directory for the schema classes defined in the file named 'schema.usda'. 
@@ -537,7 +546,7 @@ add them to these files yourself.
 Various command-line options are available for customizing the code generation 
 process. Run ```usdGenSchema --help``` for more details.
 
-\section Usd_NameSpacedPropertiesInCodeGen Namespaced Properties in Code Generation
+## Namespaced Properties in Code Generation {#Usd_NameSpacedPropertiesInCodeGen}
 
 usdGenSchema also supports the use of namespaced properties for code generation.  
 For example, float  foo:bar will generate UsdMyClass::GetFooBarAttr() and 
@@ -563,7 +572,7 @@ class MyClass "MyClass" {
 }
 \endcode 
 
-\section Usd_GlobalSchemaProperties Global Schema Properties
+## Global Schema Properties {#Usd_GlobalSchemaProperties}
 
 Each schema.usda file can contain a \em GLOBAL section like the following to
 provide customizations that apply to all the classes in the module:
@@ -630,7 +639,7 @@ Here's a short description of each datum in the global customData dictionary:
  	will be camelCased to "namespacePrefixAttrName" irrespective of
  	useLiteralIdentifier being set or not.
  
-\section Codeless_Schemas Codeless Schemas
+## Codeless Schemas {#Codeless_Schemas}
 
 By default ```usdGenSchema``` generates C++ and Python code, providing
 appropriate APIs. Clients also have an option of not generating any code by
@@ -652,7 +661,7 @@ definitions (args files) using the Sdr library. ```usdgenschemafromsdr``` is the
 utility which generates schema.usda, generatedSchema.usda and plugInfo.json for
 the usdRiPxr schema domain.
 
-\section Usd_PerClassProperties Customizing Per-Class Properties
+## Customizing Per-Class Properties {#Usd_PerClassProperties}
 
 \code
 class PxHairman "PxHairman" (
@@ -762,7 +771,7 @@ Here's a short description of each datum in the per-class customData dictionary:
     versions which lack this schema will use to choose a suitable alternative 
     schema type.
 
-\section Usd_CustomizingPerProperty Customizing Per-Property 
+## Customizing Per-Property  {#Usd_CustomizingPerProperty}
 
 \code
 ColorFloat[] primvars:displayColor (
@@ -795,7 +804,7 @@ dictionary:
     accessor API will be generated for this property, as if the property had
     set 'apiName' to the empty string. 
 
-\section Usd_ExampleSchema Example Schema Classes
+## Example Schema Classes {#Usd_ExampleSchema}
 
 \code
 #usda 1.0
@@ -1006,15 +1015,13 @@ class "GridCrittersAPI" (
 
 See \ref Usd_Page_Datatypes for the list of all data types provided by Sdf.
 
-\section Usd_GeneratedSchemaCustomCode Adding Custom Code To Generated Schemas
+## Adding Custom Code To Generated Schemas {#Usd_GeneratedSchemaCustomCode}
 
 Custom code written after the "// --(BEGIN CUSTOM CODE)--" delimiter in the 
 generated schema files will be preserved between successive usdGenSchema runs. 
 Typically, this will include additional API you may want to provide on your
 schema classes.
 
-\section Usd_SchemaExtensionPhilosophy Impact on Interchange of Creating and Extending Schemas
+## Impact on Interchange of Creating and Extending Schemas {#Usd_SchemaExtensionPhilosophy}
 
 Coming soon!
-
-*/
