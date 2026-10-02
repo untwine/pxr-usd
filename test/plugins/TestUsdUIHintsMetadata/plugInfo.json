@@ -1,0 +1,22 @@
+{
+    "Plugins": [
+        {
+            "Type": "resource",
+            "Name": "TestUsdUIHintsMetadata",
+            "Root": ".",
+            "ResourcePath": ".",
+            "Info": {
+                "SdfMetadata": {
+                    "uiHints": {
+                        "appliesTo": [
+                            "prims",
+                            "properties"
+                        ],
+                        "documentation": "Presentation hints",
+                        "type": "dictionary"
+                    }
+                }
+            }
+        }
+    ]
+}

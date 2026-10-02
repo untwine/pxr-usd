@@ -6,7 +6,7 @@
 //
 #include <pxr/usd/pxr.h>
 
-#include "TestUsdResolverChangedResolver.h"
+#include "plugin.h"
 
 #include <pxr/ar/resolver.h>
 #include <pxr/ar/resolverContext.h>
@@ -16,11 +16,10 @@
 #include <pxr/usd/stage.h>
 #include <pxr/usd/notice.h>
 
-#include <pxr/arch/systemInfo.h>
 #include <pxr/plug/plugin.h>
 #include <pxr/plug/registry.h>
 #include <pxr/plug/staticInterface.h>
-#include <pxr/tf/stringUtils.h>
+#include <pxr/tf/getenv.h>
 
 USD_NAMESPACE_USING_DIRECTIVE
 
@@ -35,13 +34,8 @@ SetupPlugins()
 {
     ArSetPreferredResolver("_TestResolver");
 
-    // Register _TestResolver plugin. We assume the build system will
-    // install it to the UsdPlugins subdirectory in the same location as
-    // this test.
-    const std::string pluginPath =
-        TfStringCatPaths(
-            TfGetPathName(ArchGetExecutablePath()),
-            "UsdPlugins/lib/TestUsdResolverChangedResolver*/Resources/") + "/";
+    // Register _TestResolver plugin from the path set by the build system.
+    const std::string pluginPath = TfGetenv("USD_RESOLVER_CHANGED_PLUGIN");
 
     PlugPluginPtrVector plugins =
         PlugRegistry::GetInstance().RegisterPlugins(pluginPath);

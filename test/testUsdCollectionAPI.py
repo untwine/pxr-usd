@@ -318,6 +318,7 @@ class TestUsdCollectionAPI(unittest.TestCase):
         self.assertTrue(query.IsPathIncluded(box.GetPath()))
         self.assertTrue(query.IsPathIncluded(materials.GetPath()))
 
+    @unittest.skip("Requires UsdGeom schemas")
     def test_testReadCollection(self):
         leafGeom = Usd.CollectionAPI(testPrim, "leafGeom")
         self.assertTrue(leafGeom.IsInRelationshipsMode())

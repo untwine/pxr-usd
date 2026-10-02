@@ -107,6 +107,7 @@ class TestUsdSplines(unittest.TestCase):
         spline.SetInnerLoopParams(lp)
         self._DoSerializationTest("Empty_LoopParams", spline)
 
+    @unittest.skip("Requires Ts test utilities")
     def test_Serialization_Museum(self):
         """
         Test serialization with some Museum cases.

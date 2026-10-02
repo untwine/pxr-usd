@@ -11,13 +11,9 @@ import os, unittest, shutil
 class TestUsdExternalAssetDependencies(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        testRoot = os.path.join(os.path.dirname(__file__), 'UsdPlugins')
-        testPluginsDso = testRoot + '/lib'
-        testPluginsDsoSearch = testPluginsDso + \
-            '/TestUsdProceduralExternalAssetsFileFormatPlugin*/Resources/'
-
         try:
-            plugins = Plug.Registry().RegisterPlugins(testPluginsDsoSearch)
+            plugins = Plug.Registry().RegisterPlugins(
+                os.environ.get("USD_EXTERNAL_ASSETS_PLUGIN"))
             assert len(plugins) == 1
             assert plugins[0].name == \
                 "Test_UsdProceduralExternalAssetsFileFormatPlugin"

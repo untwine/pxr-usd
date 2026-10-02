@@ -6,7 +6,7 @@
 //
 #include <pxr/usd/pxr.h>
 
-#include "TestUsdResolverChangedResolver.h"
+#include "plugin.h"
 
 #include <pxr/ar/defineResolver.h>
 #include <pxr/ar/defineResolverContext.h>
