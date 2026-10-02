@@ -1,0 +1,69 @@
+// Copyright 2016 Pixar
+//
+// Licensed under the terms set forth in the LICENSE.txt file available at
+// https://openusd.org/license.
+//
+
+#ifndef PXR_USD_H
+#define PXR_USD_H
+
+#include <pxr/arch/pxr.h>
+#include <pxr/gf/pxr.h>
+#include <pxr/kind/pxr.h>
+#include <pxr/pcp/pxr.h>
+#include <pxr/sdf/pxr.h>
+#include <pxr/ar/pxr.h>
+#include <pxr/plug/pxr.h>
+#include <pxr/tf/pxr.h>
+#include <pxr/trace/pxr.h>
+#include <pxr/ts/pxr.h>
+#include <pxr/vt/pxr.h>
+#include <pxr/work/pxr.h>
+
+#ifdef PXR_PYTHON_SUPPORT_ENABLED
+#include <pxr/boost/python/common.hpp>
+#endif
+
+#define USD_MAJOR_VERSION @PROJECT_VERSION_MAJOR@
+#define USD_MINOR_VERSION @PROJECT_VERSION_MINOR@
+#define USD_PATCH_VERSION @PROJECT_VERSION_PATCH@
+
+#define USD_VERSION (USD_MAJOR_VERSION * 10000 \
+                   + USD_MINOR_VERSION * 100   \
+                   + USD_PATCH_VERSION)
+
+#define PXR_NS pxr
+#define USD_INTERNAL_NS pxrInternal_v@PROJECT_VERSION_MAJOR@_@PROJECT_VERSION_MINOR@_@PROJECT_VERSION_PATCH@__pxrReserved__
+#define PXR_NS_GLOBAL ::PXR_NS
+
+namespace USD_INTERNAL_NS { }
+
+namespace PXR_NS {
+    using namespace USD_INTERNAL_NS;
+}
+
+// Import direct dependencies into usd's internal namespace.
+// This keeps resolution correct if package versions ever drift.
+namespace USD_INTERNAL_NS {
+    using namespace ARCH_INTERNAL_NS;
+    using namespace GF_INTERNAL_NS;
+    using namespace KIND_INTERNAL_NS;
+    using namespace PCP_INTERNAL_NS;
+    using namespace SDF_INTERNAL_NS;
+    using namespace AR_INTERNAL_NS;
+    using namespace PLUG_INTERNAL_NS;
+    using namespace TF_INTERNAL_NS;
+    using namespace TRACE_INTERNAL_NS;
+    using namespace TS_INTERNAL_NS;
+    using namespace VT_INTERNAL_NS;
+    using namespace WORK_INTERNAL_NS;
+#ifdef PXR_PYTHON_SUPPORT_ENABLED
+    using namespace BOOST_INTERNAL_NS;
+#endif
+}
+
+#define USD_NAMESPACE_OPEN_SCOPE   namespace USD_INTERNAL_NS {
+#define USD_NAMESPACE_CLOSE_SCOPE  }
+#define USD_NAMESPACE_USING_DIRECTIVE using namespace PXR_NS;
+
+#endif // PXR_USD_H
